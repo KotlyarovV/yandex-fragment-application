@@ -55,64 +55,39 @@ public class ListFragment extends Fragment {
         return rootView;
     }
 
+
+
     private AdapterView.OnItemClickListener handleItemClick(final Context context) {
         return new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 ListNote listNote = items.get(i);
-                Intent intent = new Intent(context, NoteEditorActivity.class);
-                intent.putExtra(REDACTED_NOTE, listNote);
-                intent.putExtra(REDACTED_NOTE_NUMBER, i);
-                startActivityForResult(intent, REQUEST_CODE_REDACT_NOTE);
+                NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(REDACTED_NOTE, listNote);
+                noteEditorFragment.setArguments(bundle);
+                launchNoteEditor(noteEditorFragment);
             }
         };
     }
 
-    private void LaunchNoteEditor() {
-        NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
+    private void launchNoteEditor(NoteEditorFragment noteEditorFragment) {
+
         noteEditorFragment.setTargetFragment(ListFragment.this, REQUEST_CODE_CREATE_NOTE);
 
         getFragmentManager().beginTransaction()
                 .addToBackStack(null)
                 .replace(R.id.fragment_container, noteEditorFragment)
                 .commit();
-        /*
-
-        getChildFragmentManager()
-                .beginTransaction()
-                .show(noteEditorFragment)
-                .commit();
-
-        */
-
-    //    getActivity()
-       //         .getSupportFragmentManager()
-         //       .beginTransaction()
-           //     .replace(R.id.fragment_container, noteEditorFragment)
-             //   .commit();
-
-      //  getChildFragmentManager()
-        //FragmentManager fragmentManager = getFragmentManager();
-    //    noteEditorFragment.show();
-    //    noteEditorFragment.show(getFragmentManager(), noteEditorFragment.getClass().getName());
-       // getFragmentManager().beginTransaction().show(noteEditorFragment).commit();
-       /* getActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .show(noteEditorFragment)
-                .commit(); */
     }
 
     private View.OnClickListener handleAddButtonClick(final Context context) {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               // Intent intent = new Intent(context, NoteEditorActivity.class);
-               // startActivityForResult(intent, REQUEST_CODE_CREATE_NOTE);
-
-///                NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
-   //             noteEditorFragment.setTargetFragment(context, REQUEST_CODE_CREATE_NOTE);
-                LaunchNoteEditor();
+                NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
+                launchNoteEditor(noteEditorFragment);
             }
         };
     }
