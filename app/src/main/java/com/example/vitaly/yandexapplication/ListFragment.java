@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,15 +38,18 @@ public class ListFragment extends Fragment {
     public static final String REDACTED_NOTE_NUMBER = "REDACTED_NOTE_NUMBER";
     public static final String ITEMS = "ITEMS";
 
-    private ListView listView;
+    private RecyclerView recyclerView;
     private ArrayList<ListNote> items;
     private ListNoteAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         items = new ArrayList<>();
-        adapter = new ListNoteAdapter(getContext(), items);
+        adapter = new ListNoteAdapter(getContext(), items, handleItemClick(getContext()));
+
+
         if (savedInstanceState != null) {
             List<ListNote> items = (ArrayList<ListNote>) savedInstanceState.getSerializable(ITEMS);
             this.items.addAll(items);
@@ -54,14 +60,14 @@ public class ListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-       // return super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.list_fragment, container, false);
-
         ((MainActivity) getActivity()).setActionBar(R.color.colorPrimary, getString(R.string.app_name));
-        listView = (ListView) rootView.findViewById(R.id.listView);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(handleItemClick(getContext()));
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(adapter);
 
+        layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setAutoMeasureEnabled(false);
+        recyclerView.setLayoutManager(layoutManager);
 
         FloatingActionButton fab = rootView.findViewById(R.id.fab);
         fab.setOnClickListener(handleAddButtonClick(getContext()));
@@ -71,10 +77,11 @@ public class ListFragment extends Fragment {
 
 
 
-    private AdapterView.OnItemClickListener handleItemClick(final Context context) {
-        return new AdapterView.OnItemClickListener() {
+    private View.OnClickListener handleItemClick(final Context context) {
+        return new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onClick(final View view) {
+                int i = recyclerView.getChildLayoutPosition(view);
                 ListNote listNote = items.get(i);
                 NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
 

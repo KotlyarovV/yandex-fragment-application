@@ -7,13 +7,14 @@
     tools:context="com.example.vitaly.yandexapplication.MainActivity">
 
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView"
-        android:paddingTop="@dimen/list_padding_top">
+        android:layout_height="match_parent"
+        android:id="@+id/recyclerView"
+        android:paddingTop="@dimen/list_padding_top"
+        >
 
-    </ListView>
+    </android.support.v7.widget.RecyclerView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
