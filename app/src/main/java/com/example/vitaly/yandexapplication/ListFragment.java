@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -38,33 +39,28 @@ public class ListFragment extends Fragment {
     public static final String REDACTED_NOTE_NUMBER = "REDACTED_NOTE_NUMBER";
     public static final String ITEMS = "ITEMS";
 
+    public ArrayList<ListNote> notes;
+
     private RecyclerView recyclerView;
-    private ArrayList<ListNote> items;
     private ListNoteAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        items = new ArrayList<>();
-        adapter = new ListNoteAdapter(getContext(), items, handleItemClick(getContext()));
-
-
-        if (savedInstanceState != null) {
-            List<ListNote> items = (ArrayList<ListNote>) savedInstanceState.getSerializable(ITEMS);
-            this.items.addAll(items);
-            adapter.notifyDataSetChanged();
-        }
+        notes = ((MainActivity) getActivity()).notes;
+        adapter = new ListNoteAdapter(getContext(), notes, handleItemClick(getContext()));
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.list_fragment, container, false);
-        ((MainActivity) getActivity()).setActionBar(R.color.colorPrimary, getString(R.string.app_name));
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         recyclerView.setAdapter(adapter);
-
+        MainActivity activity = (MainActivity) getActivity();
+        activity.setActionBar(activity.mainColor, getString(R.string.app_name));
         layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setAutoMeasureEnabled(false);
         recyclerView.setLayoutManager(layoutManager);
@@ -82,7 +78,7 @@ public class ListFragment extends Fragment {
             @Override
             public void onClick(final View view) {
                 int i = recyclerView.getChildLayoutPosition(view);
-                ListNote listNote = items.get(i);
+                ListNote listNote = notes.get(i);
                 NoteEditorFragment noteEditorFragment = new NoteEditorFragment();
 
                 Bundle bundle = new Bundle();
@@ -126,36 +122,37 @@ public class ListFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CREATE_NOTE && resultCode == RESULT_OK) {
             ListNote listNote = (ListNote) data.getSerializableExtra(NoteEditorFragment.NODE_EDITOR_DATA);
-            items.add(listNote);
+            notes.add(listNote);
             adapter.notifyDataSetChanged();
         }
 
         if (requestCode == REQUEST_CODE_REDACT_NOTE && resultCode == RESULT_OK) {
             ListNote listNote = (ListNote) data.getSerializableExtra(NoteEditorFragment.NODE_EDITOR_DATA);
             int i = data.getIntExtra(REDACTED_NOTE_NUMBER, 0);
-            items.set(i, listNote);
+            notes.set(i, listNote);
             adapter.notifyDataSetChanged();
         }
 
         if (requestCode == REQUEST_CODE_REDACT_NOTE && resultCode == NoteEditorFragment.DELETE_RESULT) {
             int i = data.getIntExtra(REDACTED_NOTE_NUMBER, 0);
-            items.remove(i);
+            notes.remove(i);
             adapter.notifyDataSetChanged();
         }
+
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(ITEMS, items);
+        outState.putSerializable(ITEMS, notes);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null && items.size() == 0) {
+        if (savedInstanceState != null && notes.size() == 0) {
             List<ListNote> items = (ArrayList<ListNote>) savedInstanceState.getSerializable(ITEMS);
-            this.items.addAll(items);
+            this.notes.addAll(items);
             adapter.notifyDataSetChanged();
         }
     }
